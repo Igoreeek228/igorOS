@@ -1,24 +1,22 @@
-This is free and unencumbered software released into the public domain.
+VISIBLE SOURCE & BINARY LICENSE
 
-Anyone is free to copy, modify, publish, use, compile, sell, or
-distribute this software, either in source code form or as a compiled
-binary, for any purpose, commercial or non-commercial, and by any
-means.
+Copyright (c) [2026] igoreeek_228. All Rights Reserved.
 
-In jurisdictions that recognize copyright laws, the author or authors
-of this software dedicate any and all copyright interest in the
-software to the public domain. We make this dedication for the benefit
-of the public at large and to the detriment of our heirs and
-successors. We intend this dedication to be an overt act of
-relinquishment in perpetuity of all present and future rights to this
-software under copyright law.
+=== TL;DR (КРАТКО) ===
+Вы можете: Смотреть код, скачивать и использовать ISO, делиться ISO.
+Вы НЕ можете: Копировать код, изменять его и создавать свои проекты на его основе. Всё должно быть согласованно с автором. Связаться: TikTok @igoreeek_228
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
-OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-OTHER DEALINGS IN THE SOFTWARE.
+=== ПОЛНЫЙ ТЕКСТ ===
 
-For more information, please refer to <https://unlicense.org>
+1. ИСХОДНЫЙ КОД (ТОЛЬКО ДЛЯ ОЗНАКОМЛЕНИЯ)
+Исходный код данного репозитория открыт исключительно для чтения, аудита и образовательных целей.
+- РАЗРЕШЕНО: Просматривать код, изучать его структуру, создавать Issues и Pull Requests в данный репозиторий.
+- ЗАПРЕЩЕНО: Копировать, модифицировать, заимствовать части кода, создавать форки для стороннего использования или встраивать код в другие проекты без письменного согласия правообладателя.
+
+2. ДВОИЧНЫЕ ФАЙЛЫ И ISO (СВОБОДНОЕ ИСПОЛЬЗОВАНИЕ)
+Скомпилированные файлы и образ(.iso), размещенные в разделе Releases, предоставляются бесплатно.
+- РАЗРЕШЕНО: Скачивать, устанавливать, запускать и передавать оригинальный (.iso) файл третьим лицам.
+- УСЛОВИЕ: Файл ISO должен распространяться в исходном виде без внесения изменений в сборку.
+
+3. ОТКАЗ ОТ ОТВЕТСТВЕННОСТИ
+Программа и ISO-образ предоставляются «как есть» (AS IS). Автор не несет ответственности за любые сбои или потерю данных.
