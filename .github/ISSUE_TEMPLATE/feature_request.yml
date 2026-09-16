@@ -1,0 +1,46 @@
+name: 💡 Идея / Предложение
+title: '[Предложение] '
+description: Предложить новую функцию или улучшение для CubeHavoc
+labels: ['type: идея', 'status: нуждается в сортировке']
+
+body:
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: ⚠️ Чеклист
+      description: Перед созданием предложения, удостоверьтесь что выполнили следующие пункты
+      options:
+        - label: Я проверил, что подобной идеи ещё нет в [Issues](https://github.com/JunDevX/CubeHavoc/issues) или [Discussions](https://github.com/JunDevX/CubeHavoc/discussions)
+        - label: Моё предложение относится к улучшению или новому функционалу CubeHavoc
+          required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Суть предложения
+      description: Кратко опишите, какую функцию или изменение вы хотите увидеть
+      placeholder: Например: Добавить поддержку кастомных шейдеров / оптимизацию для слабых ПК
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem_or_use_case
+    attributes:
+      label: Зачем это нужно?
+      description: Опишите проблему, которую решает эта идея, или scenario (сценарий) использования
+      placeholder: Это поможет пользователям удобнее настраивать...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution_details
+    attributes:
+      label: Как вы это видите?
+      description: Подробно опишите, как именно должна работать фича или интерфейс (по желанию)
+      placeholder: Описание работы, концепт-арты, макеты или примеры из других проектов
+
+  - type: textarea
+    id: additions
+    attributes:
+      label: Дополнительные детали
+      description: Ссылки, референсы, скриншоты или любые другие полезные материалы
