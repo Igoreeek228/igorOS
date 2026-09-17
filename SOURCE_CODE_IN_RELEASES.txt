@@ -1,2 +1,0 @@
-RU: Исходный код в релизах!
-EN: Source code in RELEASES!
