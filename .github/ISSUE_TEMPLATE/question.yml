@@ -1,0 +1,36 @@
+name: ❓ Вопрос
+title: '[Вопрос] '
+description: Задать вопрос о работе или настройке CubeHavoc
+labels: ['type: вопрос', 'status: нуждается в сортировке']
+
+body:
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: ⚠️ Чеклист
+      description: Перед тем как задать вопрос, удостоверьтесь что выполнили следующие пункты
+      options:
+        - label: Я искал ответ в [README](https://github.com/JunDevX/CubeHavoc/blob/main/README.md), а также среди [Issues](https://github.com/JunDevX/CubeHavoc/issues) и [Discussions](https://github.com/JunDevX/CubeHavoc/discussions)
+          required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Ваш вопрос
+      description: Чётко и подробно сформулируйте свой вопрос
+      placeholder: Как правильно настроить... / Где найти...
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Контекст и попытки решения
+      description: Опишите, что вы уже пробовали сделать или в каком контексте возник вопрос
+      placeholder: Я пытался запустить через... но столкнулся с...
+
+  - type: textarea
+    id: additions
+    attributes:
+      label: Дополнительная информация
+      description: Скриншоты, конфиги или логи, которые помогут быстрее ответить на вопрос
