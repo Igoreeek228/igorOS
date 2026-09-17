@@ -1,0 +1,60 @@
+name: Notify Telegram on Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Release Notification to Telegram
+        env:
+          BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT_ID_1: ${{ secrets.TELEGRAM_CHAT_ID_1 }}
+          # CHAT_ID_2: ${{ secrets.TELEGRAM_CHAT_ID_2 }}
+          RELEASE_TITLE: ${{ github.event.release.name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_URL: ${{ github.event.release.html_url }}
+          AUTHOR_LOGIN: ${{ github.event.release.author.login }}
+          AUTHOR_URL: ${{ github.event.release.author.html_url }}
+        run: |
+          # Выбор случайного заголовка из двух вариантов
+          HEADINGS=(
+            "УХТЫ НОВЫЙ РЕЛИЗ!"
+            "СРОЧНО ОБНОВЛЯЙ IgorOS ИЛИ ТВОЙ КОМП УТОНЕТ!"
+          )
+          RANDOM_HEADER="${HEADINGS[$RANDOM % 2]}"
+
+          # Если название релиза не указано, используем имя тега
+          TITLE="${RELEASE_TITLE:-$RELEASE_TAG}"
+
+          # Экранирование спецсимволов для HTML
+          ESCAPED_TITLE=$(echo "$TITLE" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g')
+          ESCAPED_AUTHOR=$(echo "$AUTHOR_LOGIN" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g')
+          ESCAPED_TAG=$(echo "$RELEASE_TAG" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g')
+
+          # Формирование текста сообщения (HTML разметка)
+          TEXT="<b>${RANDOM_HEADER}</b>%0A%0AОбновление: ${ESCAPED_TITLE}%0AВыложил релиз: <a href=\"${AUTHOR_URL}\">${ESCAPED_AUTHOR}</a>%0AТег релиза: ${ESCAPED_TAG}"
+
+          # Формирование JSON для инлайн-кнопки
+          REPLY_MARKUP=$(jq -c -n --arg url "$RELEASE_URL" '{
+            inline_keyboard: [[
+              { text: "Установить обновление!", url: $url }
+            ]]
+          }')
+
+          # Функция отправки в Telegram
+          send_message() {
+            local chat_id="$1"
+            curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+              -d "chat_id=${chat_id}" \
+              -d "text=${TEXT}" \
+              -d "parse_mode=HTML" \
+              -d "disable_web_page_preview=true" \
+              --data-urlencode "reply_markup=${REPLY_MARKUP}" > /dev/null
+          }
+
+          # Отправка в оба канала
+          send_message "$CHAT_ID_1"
+          send_message "$CHAT_ID_2"
