@@ -12,7 +12,7 @@ jobs:
         env:
           BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           CHAT_ID_1: ${{ secrets.TELEGRAM_CHAT_ID_1 }}
-          # CHAT_ID_2: ${{ secrets.TELEGRAM_CHAT_ID_2 }}
+          CHAT_ID_2: ${{ secrets.TELEGRAM_CHAT_ID_2 }}
           RELEASE_TITLE: ${{ github.event.release.name }}
           RELEASE_TAG: ${{ github.event.release.tag_name }}
           RELEASE_URL: ${{ github.event.release.html_url }}
