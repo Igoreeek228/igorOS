@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>igorOS — Простая и быстрая операционная система</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-color: #2563eb;
+            --accent-hover: #1d4ed8;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            border-bottom: 1px solid var(--border-color);
+            padding: 20px 0;
+        }
+
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--text-main);
+            text-decoration: none;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 0.95rem;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-main);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 80px 0 60px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 2.8rem;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 650px;
+            margin: 0 auto 32px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background-color: var(--card-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--border-color);
+        }
+
+        /* Release Info Card */
+        .release-box {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 40px 0;
+            text-align: left;
+        }
+
+        .release-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        .release-tag {
+            background-color: #0284c7;
+            color: white;
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .release-date {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .release-body {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            white-space: pre-wrap;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 40px 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .feature-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 24px;
+        }
+
+        .feature-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .feature-icon {
+            width: 24px;
+            height: 24px;
+            fill: none;
+            stroke: var(--accent-color);
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
+
+        .feature-card h3 {
+            font-size: 1.1rem;
+        }
+
+        .feature-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Image Slideshow Section */
+        .slideshow-section {
+            margin: 40px 0;
+        }
+
+        .slideshow-container {
+            position: relative;
+            width: 100%;
+            height: 420px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+        }
+
+        .slideshow-container img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
+        .slideshow-container img.active {
+            opacity: 1;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border-color);
+            padding: 30px 0;
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: var(--text-muted);
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            .slideshow-container {
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container nav-content">
+            <a href="#" class="logo">igorOS</a>
+            <div class="nav-links">
+                <a href="#features">Возможности</a>
+                <a href="#release">Скачать</a>
+                <a href="https://github.com/Igoreeek228/igorOS" target="_blank" rel="noopener noreferrer">GitHub</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <h1>Простая и быстрая операционная система</h1>
+            <p>igorOS — открытый проект, созданный для минимализма, быстродействия и удобства использования без лишней нагрузки на систему.</p>
+            
+            <div class="cta-buttons">
+                <a id="download-btn" href="https://github.com/Igoreeek228/igorOS/releases/latest" class="btn btn-primary">Загрузить igorOS</a>
+                <a href="https://github.com/Igoreeek228/igorOS" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">Исходный код</a>
+            </div>
+        </section>
+
+        <!-- Dynamic Release Block -->
+        <section id="release" class="release-box">
+            <div class="release-header">
+                <div>
+                    <strong>Последний релиз: </strong>
+                    <span id="version-tag" class="release-tag">Загрузка...</span>
+                </div>
+                <span id="release-date" class="release-date"></span>
+            </div>
+            <div id="release-notes" class="release-body">
+                Получение сведений о последней версии с GitHub...
+            </div>
+        </section>
+
+        <!-- Features Grid -->
+        <section id="features" class="features">
+            <div class="feature-card">
+                <div class="feature-header">
+                    <svg class="feature-icon" viewBox="0 0 24 24">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                    <h3>Высокая скорость</h3>
+                </div>
+                <p>Оптимизированный код и отсутствие встроенного мусора гарантируют моментальный отклик на любом железе.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-header">
+                    <svg class="feature-icon" viewBox="0 0 24 24">
+                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                    </svg>
+                    <h3>Открытый исходный код</h3>
+                </div>
+                <p>Проект полностью открыт. Разрабатывается сообществом и дорабатывается в соответствии с потребностями пользователей.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-header">
+                    <svg class="feature-icon" viewBox="0 0 24 24">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg>
+                    <h3>Легкая установка</h3>
+                </div>
+                <p>Минималистичный процесс развертывания позволит быстро запустить и настроить рабочее окружение.</p>
+            </div>
+        </section>
+
+        <!-- Image Gallery Slideshow -->
+        <section class="slideshow-section">
+            <div class="slideshow-container">
+                <img src="photo1.png" alt="Скриншот igorOS 1" class="active">
+                <img src="photo2.png" alt="Скриншот igorOS 2">
+                <img src="photo3.png" alt="Скриншот igorOS 3">
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 igorOS Project. Лицензия MIT.</p>
+            <p><a href="https://github.com/Igoreeek228/igorOS/issues" target="_blank" rel="noopener noreferrer">Сообщить об ошибке</a> | <a href="https://github.com/Igoreeek228/igorOS" target="_blank" rel="noopener noreferrer">Репозиторий на GitHub</a></p>
+        </div>
+    </footer>
+
+    <script>
+        const RELEASE_API_URL = 'https://api.github.com/repos/Igoreeek228/igorOS/releases/latest';
+        const RELEASE_CACHE_KEY = 'igoros_latest_release_cache';
+        const RELEASE_CACHE_TTL = 10 * 60 * 1000; // 10 минут — снижает риск упереться в лимит запросов GitHub API
+
+        function renderRelease(data) {
+            // Имя/тэг релиза
+            document.getElementById('version-tag').textContent = data.tag_name || data.name || 'Неизвестная версия';
+
+            // Дата публикации
+            if (data.published_at) {
+                const date = new Date(data.published_at);
+                document.getElementById('release-date').textContent = date.toLocaleDateString('ru-RU');
+            } else {
+                document.getElementById('release-date').textContent = '';
+            }
+
+            // Описание релиза (Changelog)
+            document.getElementById('release-notes').textContent = data.body && data.body.trim()
+                ? data.body
+                : 'Описание к этому релизу отсутствует.';
+
+            // Прямая ссылка на файл из assets (если загружен), иначе ссылка на страницу релиза
+            const downloadBtn = document.getElementById('download-btn');
+            if (data.assets && data.assets.length > 0) {
+                downloadBtn.href = data.assets[0].browser_download_url;
+            } else if (data.html_url) {
+                downloadBtn.href = data.html_url;
+            }
+        }
+
+        function showReleaseFallback(message) {
+            document.getElementById('version-tag').textContent = 'v1.0.0 (Beta)';
+            document.getElementById('release-date').textContent = '';
+            document.getElementById('release-notes').textContent =
+                message || 'Перейдите в раздел релиза на GitHub для загрузки файлов.';
+        }
+
+        function readReleaseCache() {
+            try {
+                const raw = localStorage.getItem(RELEASE_CACHE_KEY);
+                if (!raw) return null;
+                const cached = JSON.parse(raw);
+                if (!cached || (Date.now() - cached.timestamp) > RELEASE_CACHE_TTL) return null;
+                return cached.data;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function writeReleaseCache(data) {
+            try {
+                localStorage.setItem(RELEASE_CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
+            } catch (e) {
+                // localStorage недоступен (приватный режим и т.п.) — просто пропускаем кеширование
+            }
+        }
+
+        async function fetchLatestRelease() {
+            // Сначала пробуем свежий кеш, чтобы не дёргать API лишний раз
+            const cached = readReleaseCache();
+            if (cached) {
+                renderRelease(cached);
+                return;
+            }
+
+            try {
+                const response = await fetch(RELEASE_API_URL, {
+                    headers: { 'Accept': 'application/vnd.github+json' }
+                });
+
+                if (response.status === 403) {
+                    // Превышен лимит запросов к API GitHub для неавторизованных клиентов
+                    showReleaseFallback('Не удалось получить данные с GitHub (превышен лимит запросов). Загляните в раздел релизов на GitHub.');
+                    return;
+                }
+
+                if (response.status === 404) {
+                    // Релизов пока нет
+                    showReleaseFallback('Релизов пока не опубликовано. Загляните позже.');
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error('Релиз не найден');
+                }
+
+                const data = await response.json();
+                renderRelease(data);
+                writeReleaseCache(data);
+
+            } catch (error) {
+                showReleaseFallback();
+            }
+        }
+
+        fetchLatestRelease();
+
+        // Слайдшоу: плавно переключает изображения по кругу.
+        // Если изображение не загрузилось (файл отсутствует), убираем его из ротации,
+        // чтобы не показывать битую иконку.
+        function initSlideshow() {
+            let slides = Array.from(document.querySelectorAll('.slideshow-container img'));
+            if (slides.length === 0) return;
+
+            let currentIndex = slides.findIndex((img) => img.classList.contains('active'));
+            if (currentIndex === -1) currentIndex = 0;
+
+            slides.forEach((img) => {
+                img.addEventListener('error', () => {
+                    img.style.display = 'none';
+                    slides = slides.filter((s) => s !== img);
+                });
+            });
+
+            if (slides.length <= 1) return;
+
+            setInterval(() => {
+                if (slides.length <= 1) return;
+                slides[currentIndex].classList.remove('active');
+                currentIndex = (currentIndex + 1) % slides.length;
+                slides[currentIndex].classList.add('active');
+            }, 4000);
+        }
+
+        initSlideshow();
+    </script>
+</body>
+</html>
