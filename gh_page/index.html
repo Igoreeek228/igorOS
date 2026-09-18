@@ -174,14 +174,61 @@
             padding: 24px;
         }
 
+        .feature-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .feature-icon {
+            width: 24px;
+            height: 24px;
+            fill: none;
+            stroke: var(--accent-color);
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
+
         .feature-card h3 {
-            margin-bottom: 8px;
             font-size: 1.1rem;
         }
 
         .feature-card p {
             color: var(--text-muted);
             font-size: 0.95rem;
+        }
+
+        /* Image Slideshow Section */
+        .slideshow-section {
+            margin: 40px 0;
+        }
+
+        .slideshow-container {
+            position: relative;
+            width: 100%;
+            height: 420px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+        }
+
+        .slideshow-container img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
+        .slideshow-container img.active {
+            opacity: 1;
         }
 
         /* Footer */
@@ -198,6 +245,12 @@
             color: var(--text-muted);
             text-decoration: underline;
         }
+
+        @media (max-width: 600px) {
+            .slideshow-container {
+                height: 250px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -208,7 +261,7 @@
             <div class="nav-links">
                 <a href="#features">Возможности</a>
                 <a href="#release">Скачать</a>
-                <a href="https://github.com/Igoreeek228/igorOS" target="_blank">GitHub</a>
+                <a href="https://github.com/Igoreeek228/igorOS" target="_blank" rel="noopener noreferrer">GitHub</a>
             </div>
         </div>
     </header>
@@ -220,7 +273,7 @@
             
             <div class="cta-buttons">
                 <a id="download-btn" href="https://github.com/Igoreeek228/igorOS/releases/latest" class="btn btn-primary">Загрузить igorOS</a>
-                <a href="https://github.com/Igoreeek228/igorOS" target="_blank" class="btn btn-secondary">Исходный код</a>
+                <a href="https://github.com/Igoreeek228/igorOS" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">Исходный код</a>
             </div>
         </section>
 
@@ -241,19 +294,37 @@
         <!-- Features Grid -->
         <section id="features" class="features">
             <div class="feature-card">
-                <h3>⚡ Высокая скорость</h3>
+                <div class="feature-header">
+                    <svg class="feature-icon" viewBox="0 0 24 24">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                    <h3>Высокая скорость</h3>
+                </div>
                 <p>Оптимизированный код и отсутствие встроенного мусора гарантируют моментальный отклик на любом железе.</p>
             </div>
             <div class="feature-card">
-                <h3>🛠️ Открытый исходный код</h3>
+                <div class="feature-header">
+                    <svg class="feature-icon" viewBox="0 0 24 24">
+                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                    </svg>
+                    <h3>Открытый исходный код</h3>
+                </div>
                 <p>Проект полностью открыт. Разрабатывается сообществом и дорабатывается в соответствии с потребностями пользователей.</p>
             </div>
             <div class="feature-card">
-                <h3>📦 Легкая установка</h3>
+                <div class="feature-header">
+                    <svg class="feature-icon" viewBox="0 0 24 24">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg>
+                    <h3>Легкая установка</h3>
+                </div>
                 <p>Минималистичный процесс развертывания позволит быстро запустить и настроить рабочее окружение.</p>
             </div>
         </section>
 
+        <!-- Image Gallery Slideshow -->
         <section class="slideshow-section">
             <div class="slideshow-container">
                 <img src="photo1.png" alt="Скриншот igorOS 1" class="active">
@@ -266,48 +337,136 @@
     <footer>
         <div class="container">
             <p>&copy; 2026 igorOS Project. Лицензия MIT.</p>
-            <p><a href="https://github.com/Igoreeek228/igorOS/issues" target="_blank">Сообщить об ошибке</a> | <a href="https://github.com/Igoreeek228/igorOS" target="_blank">Репозиторий на GitHub</a></p>
+            <p><a href="https://github.com/Igoreeek228/igorOS/issues" target="_blank" rel="noopener noreferrer">Сообщить об ошибке</a> | <a href="https://github.com/Igoreeek228/igorOS" target="_blank" rel="noopener noreferrer">Репозиторий на GitHub</a></p>
         </div>
     </footer>
 
     <script>
-        async function fetchLatestRelease() {
+        const RELEASE_API_URL = 'https://api.github.com/repos/Igoreeek228/igorOS/releases/latest';
+        const RELEASE_CACHE_KEY = 'igoros_latest_release_cache';
+        const RELEASE_CACHE_TTL = 10 * 60 * 1000; // 10 минут — снижает риск упереться в лимит запросов GitHub API
+
+        function renderRelease(data) {
+            // Имя/тэг релиза
+            document.getElementById('version-tag').textContent = data.tag_name || data.name || 'Неизвестная версия';
+
+            // Дата публикации
+            if (data.published_at) {
+                const date = new Date(data.published_at);
+                document.getElementById('release-date').textContent = date.toLocaleDateString('ru-RU');
+            } else {
+                document.getElementById('release-date').textContent = '';
+            }
+
+            // Описание релиза (Changelog)
+            document.getElementById('release-notes').textContent = data.body && data.body.trim()
+                ? data.body
+                : 'Описание к этому релизу отсутствует.';
+
+            // Прямая ссылка на файл из assets (если загружен), иначе ссылка на страницу релиза
+            const downloadBtn = document.getElementById('download-btn');
+            if (data.assets && data.assets.length > 0) {
+                downloadBtn.href = data.assets[0].browser_download_url;
+            } else if (data.html_url) {
+                downloadBtn.href = data.html_url;
+            }
+        }
+
+        function showReleaseFallback(message) {
+            document.getElementById('version-tag').textContent = 'v1.0.0 (Beta)';
+            document.getElementById('release-date').textContent = '';
+            document.getElementById('release-notes').textContent =
+                message || 'Перейдите в раздел релиза на GitHub для загрузки файлов.';
+        }
+
+        function readReleaseCache() {
             try {
-                const response = await fetch('https://api.github.com/repos/Igoreeek228/igorOS/releases/latest');
-                
+                const raw = localStorage.getItem(RELEASE_CACHE_KEY);
+                if (!raw) return null;
+                const cached = JSON.parse(raw);
+                if (!cached || (Date.now() - cached.timestamp) > RELEASE_CACHE_TTL) return null;
+                return cached.data;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function writeReleaseCache(data) {
+            try {
+                localStorage.setItem(RELEASE_CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
+            } catch (e) {
+                // localStorage недоступен (приватный режим и т.п.) — просто пропускаем кеширование
+            }
+        }
+
+        async function fetchLatestRelease() {
+            // Сначала пробуем свежий кеш, чтобы не дёргать API лишний раз
+            const cached = readReleaseCache();
+            if (cached) {
+                renderRelease(cached);
+                return;
+            }
+
+            try {
+                const response = await fetch(RELEASE_API_URL, {
+                    headers: { 'Accept': 'application/vnd.github+json' }
+                });
+
+                if (response.status === 403) {
+                    // Превышен лимит запросов к API GitHub для неавторизованных клиентов
+                    showReleaseFallback('Не удалось получить данные с GitHub (превышен лимит запросов). Загляните в раздел релизов на GitHub.');
+                    return;
+                }
+
+                if (response.status === 404) {
+                    // Релизов пока нет
+                    showReleaseFallback('Релизов пока не опубликовано. Загляните позже.');
+                    return;
+                }
+
                 if (!response.ok) {
                     throw new Error('Релиз не найден');
                 }
 
                 const data = await response.json();
-
-                // Имя/тэг релиза
-                document.getElementById('version-tag').textContent = data.tag_name || data.name;
-                
-                // Дата публикации
-                if (data.published_at) {
-                    const date = new Date(data.published_at);
-                    document.getElementById('release-date').textContent = date.toLocaleDateString('ru-RU');
-                }
-
-                // Описание релиза (Changelog)
-                document.getElementById('release-notes').textContent = data.body || 'Описание к этому релизу отсутствует.';
-
-                // Прямая ссылка на файл zip из assets (если загружен), иначе ссылка на страницу релиза
-                const downloadBtn = document.getElementById('download-btn');
-                if (data.assets && data.assets.length > 0) {
-                    downloadBtn.href = data.assets[0].browser_download_url;
-                } else {
-                    downloadBtn.href = data.html_url;
-                }
+                renderRelease(data);
+                writeReleaseCache(data);
 
             } catch (error) {
-                document.getElementById('version-tag').textContent = 'v1.0.0 (Beta)';
-                document.getElementById('release-notes').textContent = 'Перейдите в раздел релиза на GitHub для загрузки файлов.';
+                showReleaseFallback();
             }
         }
 
         fetchLatestRelease();
+
+        // Слайдшоу: плавно переключает изображения по кругу.
+        // Если изображение не загрузилось (файл отсутствует), убираем его из ротации,
+        // чтобы не показывать битую иконку.
+        function initSlideshow() {
+            let slides = Array.from(document.querySelectorAll('.slideshow-container img'));
+            if (slides.length === 0) return;
+
+            let currentIndex = slides.findIndex((img) => img.classList.contains('active'));
+            if (currentIndex === -1) currentIndex = 0;
+
+            slides.forEach((img) => {
+                img.addEventListener('error', () => {
+                    img.style.display = 'none';
+                    slides = slides.filter((s) => s !== img);
+                });
+            });
+
+            if (slides.length <= 1) return;
+
+            setInterval(() => {
+                if (slides.length <= 1) return;
+                slides[currentIndex].classList.remove('active');
+                currentIndex = (currentIndex + 1) % slides.length;
+                slides[currentIndex].classList.add('active');
+            }, 4000);
+        }
+
+        initSlideshow();
     </script>
 </body>
 </html>
