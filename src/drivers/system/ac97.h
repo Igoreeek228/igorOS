@@ -2,18 +2,26 @@
 #define AC97_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
-#define AC97_VENDOR_ID 0x8086
-#define AC97_DEVICE_ID 0x2415
+/*
+ * Драйвер AC'97-аудиоконтроллера (классический вариант, есть в QEMU:
+ * -soundhw ac97 / -device AC97).
+ *
+ * Воспроизведение выполняется через Buffer Descriptor List: данные можно
+ * передавать без копирования, указывая прямо на выровненные буферы
+ * (например, на вшитые в ядро WAV-дорожки).
+ */
 
-typedef struct {
-    uint32_t phys_addr;
-    uint16_t sample_count;
-    uint16_t flags;
-} __attribute__((packed)) ac97_bdl_entry_t;
+/* Сканирует PCI и инициализирует первый найденный AC'97-контроллер.
+ * Возвращает true при успехе. */
+bool ac97_init(void);
 
-int ac97_init(void);
+/* Громкость 0..100 (пересчитывается в аттенюацию кодека). */
 void ac97_set_volume(uint8_t vol);
-void ac97_play_pcm(const uint16_t* samples, uint32_t count);
+
+/* Проигрывает 16-битный стерео-PCM без копирования: буфер разбивается
+ * на дескрипторы по <= 65535 сэмплов. pcm должен быть выровнен по 2 байта. */
+void ac97_play_pcm(const uint8_t *pcm_data, uint32_t length);
 
 #endif

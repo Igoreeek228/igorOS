@@ -23,6 +23,9 @@ void toggle_music_app(void) {
 }
 
 void render_music_app_window(uint32_t* buf, int scr_w, int scr_h, int mx, int my, int btn, int click) {
+    (void)scr_h; /* высота окна фиксированная, параметр нужен для общего интерфейса окон */
+    (void)btn;   /* состояние кнопки мыши используется только через click */
+
     if (!is_open) return;
 
     int win_x = 220, win_y = 100;

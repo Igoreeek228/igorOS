@@ -73,54 +73,6 @@ void toggle_about_app(void)
 
 
 /* ==========================================
-   Draw About image
-   ========================================== */
-
-static void draw_about_image(
-    int x,
-    int y,
-    int w,
-    int h,
-    uint32_t* buf
-) {
-    if (!about_bmp_start)
-        return;
-
-    static uint32_t about_buffer[180 * 180];
-
-    draw_bmp_stretched(
-        about_bmp_start,
-        w,
-        h,
-        about_buffer
-    );
-
-    for (int py = 0; py < h; py++) {
-        for (int px = 0; px < w; px++) {
-
-            int dx = x + px;
-            int dy = y + py;
-
-            if (dx < 0 || dy < 0)
-                continue;
-
-            uint32_t col = about_buffer[py * w + px];
-
-            if ((col & 0x00FFFFFF) != 0) {
-                draw_pixel_buf(
-                    dx,
-                    dy,
-                    col
-                );
-            }
-        }
-    }
-
-    (void)buf;
-}
-
-
-/* ==========================================
    Render window
    ========================================== */
 

@@ -1,8 +1,8 @@
 section .rodata
 
-; ==========================================
-; File Manager icon
-; ==========================================
+; Файлы, вшитые в ядро (иконки, обои, курсор).
+; Секция ниже запрещает исполняемый стек для этого объектного модуля
+; (иначе линкер помечает стек как исполняемый и ругается).
 
 global file_icon_bmp_start
 global file_icon_bmp_end
@@ -70,3 +70,10 @@ global volume_bmp_end
 volume_bmp_start:
     incbin "src/gui/volume.bmp"
 volume_bmp_end:
+
+
+; ==========================================
+; Метаданные: запрет исполняемого стека
+; ==========================================
+
+section .note.GNU-stack noalloc noexec nowrite progbits

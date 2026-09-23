@@ -6,11 +6,15 @@ CC = gcc
 LD = ld
 NASM = nasm
 
-CFLAGS = -m64 -ffreestanding -fno-stack-protector -fno-pie -mno-red-zone \
-         -mcmodel=kernel -O2 -Wall -Wextra \
-         -Iinclude -Ikernel -Isrc -Ikernel/include
+# -fno-builtin: в freestanding-среде нет библиотечных реализаций,
+#   встроенные функции компилятора могут порождать вызовы в несуществующую libc.
+# -z noexecstack: стек не должен быть исполняемым (предупреждение линкера).
+CFLAGS = -m64 -std=gnu11 -ffreestanding -fno-builtin -fno-stack-protector \
+         -fno-pie -mno-red-zone -mcmodel=kernel -O2 -Wall -Wextra \
+         -z noexecstack \
+         -Ikernel -Isrc -Ikernel/include
 
-LDFLAGS = -m elf_x86_64 -no-pie --no-warn-rwx-segments \
+LDFLAGS = -m elf_x86_64 -no-pie -z noexecstack --no-warn-rwx-segments \
           -T kernel/linker.ld
 
 # ==========================================
@@ -19,7 +23,6 @@ LDFLAGS = -m elf_x86_64 -no-pie --no-warn-rwx-segments \
 
 OBJS = \
     build/kernel/kernel.o \
-    build/kernel/graphics.o \
     build/kernel/idt.o \
     build/kernel/pic.o \
     build/kernel/resources.o \
@@ -35,10 +38,10 @@ OBJS = \
     build/src/gui/apps/file/file_manager.o \
     build/src/gui/apps/music/music_app.o \
     build/src/gui/apps/about/about_app.o \
+    build/src/gui/apps/terminal/terminal_app.o \
     build/src/gui/bmp_loader.o \
     build/src/gui/cursor/cursor.o \
-    build/src/gui/font.o \
-    build/src/graphics.o
+    build/src/gui/font.o
 
 .PHONY: all clean iso img run run-iso run-img
 
