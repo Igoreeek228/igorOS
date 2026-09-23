@@ -25,6 +25,7 @@ OBJS = \
     build/kernel/kernel.o \
     build/kernel/idt.o \
     build/kernel/pic.o \
+    build/kernel/include/isr.o \
     build/kernel/resources.o \
     build/boot/loading/load_logo.o \
     build/src/desktop.o \

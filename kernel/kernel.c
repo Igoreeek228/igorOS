@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include "limine.h"
+#include "idt.h"
 #include "../boot/loading/load_logo.h"
 #include "../src/gui/font.h"
 
@@ -297,7 +298,12 @@ void kernel_main(void) {
     }
 
     serial_print("[2/6] Framebuffer initialized successfully.\n");
-    
+
+    // IDT + обработчики исключений: теперь любой сбой ядра даёт
+    // диагностируемый экран паники вместо тихой перезагрузки.
+    serial_print("[2.5/6] Installing IDT...\n");
+    idt_init();
+
     // --- ЭКРАН ЗАГРУЗКИ ---
     serial_print("[3/6] Clearing screen...\n");
     kernel_clear_screen(0x00000000); // чёрный фон
