@@ -1,4 +1,5 @@
 #include "gui/apps/music/music_app.h"
+#include "gui/desktop.h"
 #include "gui/font.h"
 #include "drivers/system/sound_manager.h"
 
@@ -10,6 +11,26 @@ static int is_open = 0;
 static int is_playing = 0;
 static int current_track = 0;
 static int progress = 25;
+
+/*
+ * BAG: раньше win_x/win_y были локальными переменными внутри
+ * render_music_app_window() и каждый кадр заново создавались как
+ * "220, 100" -- окно физически не могло запомнить, что его подвинули.
+ * Ни одной проверки заголовка/drag тут вообще не было, в отличие от
+ * остальных app-модулей (terminal, calc, settings, about, file), у
+ * которых win_x/win_y static и есть свой drag-блок. Фикс: делаем
+ * позицию окна static + добавляем тот же drag-паттерн, что и везде.
+ */
+static int win_x = 0;
+static int win_y = 0;
+static int win_w = 500;
+static int win_h = 340;
+
+static int positioned = 0;
+
+static int dragging = 0;
+static int drag_ox = 0;
+static int drag_oy = 0;
 
 static const char* track_list[] = {
     "01. Track_One.mp3",
@@ -25,8 +46,43 @@ void toggle_music_app(void) {
 void render_music_app_window(uint32_t* buf, int scr_w, int scr_h, int mx, int my, int btn, int click) {
     if (!is_open) return;
 
-    int win_x = 220, win_y = 100;
-    int win_w = 500, win_h = 340;
+    /* Центрируем окно один раз при первом открытии, дальше позиция
+     * управляется исключительно перетаскиванием (как у остальных окон). */
+    if (!positioned) {
+        win_x = (scr_w - win_w) / 2;
+        win_y = (scr_h - win_h) / 2;
+        positioned = 1;
+    }
+
+    /*
+     * Dragging -- та же логика, что и в terminal_app.c / about_app.c:
+     * зона заголовка за вычетом угла с кнопкой закрытия, общий
+     * drag-арбитраж через win_drag_available()/win_drag_claim(), чтобы
+     * при перекрытии окон тащилось только одно и оно же поднималось
+     * наверх (см. desktop.c: win_bring_to_front()).
+     */
+    int header_h = 32;
+    int traffic_zone_w = 28; /* кнопка закрытия слева, см. ниже */
+
+    if (btn && !dragging && win_drag_available() &&
+        mx >= win_x + traffic_zone_w && mx <= win_x + win_w &&
+        my >= win_y && my <= win_y + header_h)
+    {
+        dragging = 1;
+        drag_ox = mx - win_x;
+        drag_oy = my - win_y;
+        win_drag_claim();
+    }
+    if (!btn) dragging = 0;
+    if (dragging) { win_x = mx - drag_ox; win_y = my - drag_oy; }
+
+    /* BAG: клики по закрытию, трекам и кнопке play/pause реагировали,
+     * даже когда курсор физически над другим, визуально более верхним
+     * окном -- клик "проваливался" сквозь чужой title bar. Репортим
+     * свой прямоугольник и глушим click здесь же, один раз -- дальше
+     * по функции click уже гарантированно "чистый". */
+    win_report_rect(WIN_ID_MUSIC_, win_x, win_y, win_w, win_h, is_open);
+    if (win_click_occluded(WIN_ID_MUSIC_, mx, my)) click = 0;
 
     draw_rounded_rect_alpha(win_x + 4, win_y + 4, win_w, win_h, 12, 0x00000000, 80);
     draw_rounded_rect_buf(win_x, win_y, win_w, win_h, 12, 0x001C1C1E);
@@ -37,6 +93,7 @@ void render_music_app_window(uint32_t* buf, int scr_w, int scr_h, int mx, int my
     draw_rounded_rect_buf(win_x + 12, win_y + 10, 12, 12, 6, 0x00FF5F56);
     if (click && mx >= win_x + 12 && mx <= win_x + 24 && my >= win_y + 10 && my <= win_y + 22) {
         is_open = 0;
+        dragging = 0;
         return;
     }
 

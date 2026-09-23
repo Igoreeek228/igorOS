@@ -9,5 +9,6 @@ extern int mouse_left_clicked;
 
 void init_mouse(void);
 void poll_mouse(void);
+void mouse_set_bounds(uint32_t width, uint32_t height);
 
 #endif

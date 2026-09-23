@@ -10,7 +10,7 @@ body:
       label: ⚠️ Чеклист
       description: Перед тем как задать вопрос, удостоверьтесь что выполнили следующие пункты
       options:
-        - label: Я искал ответ в [README](https://github.com/JunDevX/CubeHavoc/blob/main/README.md), а также среди [Issues](https://github.com/JunDevX/CubeHavoc/issues) и [Discussions](https://github.com/JunDevX/CubeHavoc/discussions)
+        - label: Я искал ответ в [README](https://github.com/Igoreeek228/igorOS/blob/Main/README.md), а также среди [Issues](https://github.com/Igoreeek228/igorOS/issues)
           required: true
 
   - type: textarea

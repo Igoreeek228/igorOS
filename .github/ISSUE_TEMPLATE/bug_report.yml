@@ -10,8 +10,8 @@ body:
       label: ⚠️ Чеклист
       description: Перед созданием нового Issue, удостоверьтесь что выполнили следующие пункты
       options:
-        - label: Я искал решение проблемы в [README](https://github.com/JunDevX/CubeHavoc/blob/main/README.md) и среди [Issues](https://github.com/JunDevX/CubeHavoc/issues) и [Discussions](https://github.com/JunDevX/CubeHavoc/discussions)
-        - label: Я скачал `CubeHavoc` из [релизов официального репозитория](https://github.com/JunDevX/CubeHavoc/releases)
+        - label: Я искал решение проблемы в [README](https://github.com/Igoreeek228/igorOS#) и среди [Issues](https://github.com/JunDevX/CubeHavoc/issues) и [Discussions](https://github.com/JunDevX/CubeHavoc/discussions)
+        - label: Я скачал `IgorOS` из [релизов официального репозитория](https://github.com/Igoreeek228/igorOS/releases)
         - label: Ознакомился с правилами создания Issue
           required: true
 
@@ -34,9 +34,9 @@ body:
   - type: textarea
     id: version
     attributes:
-      label: Версия CubeHavoc
-      description: Версия или коммит CubeHavoc, на котором воспроизводится проблема
-      placeholder: v1.0.0
+      label: Версия IgorOS
+      description: Версия IgorOS, на котором воспроизводится проблема
+      placeholder: v1.0
     validations:
       required: true
 

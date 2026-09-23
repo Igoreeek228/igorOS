@@ -2,6 +2,8 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include "limine.h"
+#include "include/idt.h"
+#include "timer.h"
 #include "../boot/loading/load_logo.h"
 #include "../src/gui/font.h"
 
@@ -163,8 +165,10 @@ static int compute_splash_logo_size(void) {
     return target_size;
 }
 
-static void draw_logo_to_screen(const unsigned char *logo, int src_w, int src_h) {
+static void draw_logo_to_screen_alpha(const unsigned char *logo, int src_w, int src_h, int alpha) {
     if (!g_fb_vram || !logo) return;
+    if (alpha < 0) alpha = 0;
+    if (alpha > 255) alpha = 255;
 
     uint32_t bytes_per_pixel = g_screen_bpp / 8;
     if (bytes_per_pixel == 0) bytes_per_pixel = 4;
@@ -210,6 +214,16 @@ static void draw_logo_to_screen(const unsigned char *logo, int src_w, int src_h)
                                        logo[idx01 + 2] * (256 - fx) * fy +
                                        logo[idx11 + 2] * fx         * fy) >> 16);
 
+                // Big Sur-style fade-in: логотип "проявляется" из чёрного
+                // фона, а не появляется мгновенно. Смешиваем цвет логотипа
+                // с чёрным (0,0,0) по alpha/255 -- при alpha=0 пиксель
+                // остаётся чёрным (фон), при alpha=255 это чистый цвет лого.
+                if (alpha < 255) {
+                    r = (uint8_t)((r * alpha) >> 8);
+                    g = (uint8_t)((g * alpha) >> 8);
+                    b = (uint8_t)((b * alpha) >> 8);
+                }
+
                 uint8_t* pixel_addr = g_fb_vram + (target_y * g_screen_pitch) + (target_x * bytes_per_pixel);
 
                 if (bytes_per_pixel == 4) {
@@ -224,9 +238,89 @@ static void draw_logo_to_screen(const unsigned char *logo, int src_w, int src_h)
     }
 }
 
+// Совместимость: старое имя для полностью непрозрачного (alpha=255)
+// рисования логотипа, вдруг где-то ещё используется вызов без альфы.
+__attribute__((unused))
+static void draw_logo_to_screen(const unsigned char *logo, int src_w, int src_h) {
+    draw_logo_to_screen_alpha(logo, src_w, src_h, 255);
+}
+
+// Рисует маленький закрашенный кружок (для лучиков спиннера) радиусом r
+// вокруг (cx, cy). Дёшево -- спиннер маленький, лучиков всего 12.
+static void fill_dot(int cx, int cy, int r, uint32_t color) {
+    fill_rect(cx - r, cy - r, r * 2 + 1, r * 2 + 1, color);
+}
+
+// Big Sur-style индикатор загрузки: вместо линейной полосы -- 12 лучиков
+// по кругу (как системный activity indicator в macOS), один "ведущий"
+// лучик самый яркий, остальные плавно гаснут по кругу против него --
+// создаёт эффект вращения при перерисовке с новым frame_index каждый раз.
+//
+// Реализовано без libm (freestanding kernel) через маленькую таблицу
+// значений sin/cos, умноженных на 1000 и уже повёрнутых на 30° друг от
+// друга (12 лучиков =360/12 = 30° шаг).
+static void draw_boot_spinner(int frame_index, const char* label) {
+    // sin(k*30°)*1000, cos(k*30°)*1000 для k = 0..11
+    static const int sin1000[12] = {
+        0, 500, 866, 1000, 866, 500, 0, -500, -866, -1000, -866, -500
+    };
+    static const int cos1000[12] = {
+        1000, 866, 500, 0, -500, -866, -1000, -866, -500, 0, 500, 866
+    };
+
+    int logo_size = compute_splash_logo_size();
+    int cx = (int)g_screen_w / 2;
+    int cy = ((int)g_screen_h + logo_size) / 2 + 46; // чуть ниже логотипа
+
+    int outer_r = logo_size / 10;
+    if (outer_r < 14) outer_r = 14;
+    int dot_r = outer_r / 8;
+    if (dot_r < 2) dot_r = 2;
+
+    // Стираем предыдущий кадр спиннера (квадратная область с запасом).
+    fill_rect(cx - outer_r - dot_r - 2, cy - outer_r - dot_r - 2,
+               (outer_r + dot_r + 2) * 2, (outer_r + dot_r + 2) * 2, 0x00000000);
+
+    for (int k = 0; k < 12; k++) {
+        // Позиция лучика k относительно текущего "ведущего" (frame_index):
+        // 0 = самый яркий (ведущий), дальше по кругу против направления
+        // вращения -- гаснет линейно до почти невидимого.
+        int rel = (k - frame_index + 12 * 100) % 12; // всегда >= 0
+        int brightness = 255 - (rel * 255) / 12;      // 255 .. ~21
+        if (brightness < 40) brightness = 40;          // не гасить совсем в 0
+
+        int dx = (outer_r * cos1000[k]) / 1000;
+        int dy = (outer_r * sin1000[k]) / 1000;
+
+        uint32_t gray = (uint32_t)brightness;
+        uint32_t color = (gray << 16) | (gray << 8) | gray;
+
+        fill_dot(cx + dx, cy + dy, dot_r, color);
+    }
+
+    // Подпись стадии под спиннером.
+    if (label && g_screen_bpp == 32) {
+        int text_area_w = logo_size + 80;
+        int text_x0 = cx - text_area_w / 2;
+        int text_y = cy + outer_r + dot_r + 14;
+        fill_rect(text_x0, text_y - 2, text_area_w, 20, 0x00000000);
+
+        int text_w = font_text_width(label);
+        int text_x = cx - text_w / 2;
+        uint32_t* vram32 = (uint32_t*)g_fb_vram;
+        uint32_t stride = g_screen_pitch / 4;
+        draw_string(label, text_x, text_y, 0x008E8E93, vram32, stride);
+    }
+}
+
 // Рисует полосу загрузки: рамка + заполнение на percent% + подпись стадии
 // под ней. Вызывается многократно по мере продвижения загрузки — именно
 // это создаёт анимацию, а не статичную картинку.
+//
+// Оставлена как есть для обратной совместимости (пока не используется в
+// kernel_main -- там теперь draw_boot_spinner), вдруг понадобится где-то
+// как fallback.
+__attribute__((unused))
 static void draw_boot_progress(int percent, const char* label) {
     if (percent < 0) percent = 0;
     if (percent > 100) percent = 100;
@@ -264,6 +358,22 @@ static void draw_boot_progress(int percent, const char* label) {
 
 void kernel_main(void) {
     enable_sse();
+
+    /*
+     * НАСТОЯЩИЙ БАГ, из-за которого курсор не двигался вообще:
+     * idt_init() (kernel/include/idt.c) нигде не вызывался. IDT никогда
+     * не загружалась (lidt не выполнялся), и инструкция sti (разрешение
+     * аппаратных прерываний) внутри idt_init() соответственно тоже
+     * никогда не выполнялась. PS/2-мышь (drivers/system/mouse.c) корректно
+     * настраивалась и слала пакеты по IRQ12, но CPU в принципе не мог их
+     * обработать -- прерывания были глобально выключены с самого старта
+     * ядра. Двойной вызов init_mouse(), который чинили раньше, был
+     * реальной, но вторичной проблемой: даже без него курсор не мог
+     * двигаться, пока не появился этот вызов idt_init().
+     * Вызывается максимально рано, до любой другой инициализации.
+     */
+    idt_init();
+    timer_init(250);
     
     serial_print("[1/6] Checking Limine framebuffer...\n");
     if (framebuffer_request.response == NULL || framebuffer_request.response->framebuffer_count < 1) {
@@ -280,41 +390,71 @@ void kernel_main(void) {
 
     serial_print("[2/6] Framebuffer initialized successfully.\n");
     
-    // --- ЭКРАН ЗАГРУЗКИ ---
+    // --- ЭКРАН ЗАГРУЗКИ (в стиле macOS Big Sur) ---
     serial_print("[3/6] Clearing screen...\n");
     kernel_clear_screen(0x00000000); // чёрный фон
 
-    serial_print("[4/6] Drawing logo...\n");
-    draw_logo_to_screen(load_logo, LOGO_WIDTH, LOGO_HEIGHT);
+    // Big Sur: логотип не появляется мгновенно, а плавно проявляется
+    // (fade-in) из чёрного экрана. Делаем это через несколько кадров с
+    // нарастающей альфой -- держится в пределах ~0.3с, в общий 5-секундный
+    // бюджет загрузки не считаем отдельно (это часть той же паузы).
+    serial_print("[4/6] Fading in logo...\n");
+    for (int a = 0; a <= 255; a += 15) {
+        draw_logo_to_screen_alpha(load_logo, LOGO_WIDTH, LOGO_HEIGHT, a);
+        timer_wait_ms(20);
+    }
+    draw_logo_to_screen_alpha(load_logo, LOGO_WIDTH, LOGO_HEIGHT, 255);
 
-    // Вместо слепого "нарисовали лого и ждём 3 секунды в пустоту" — реальный
-    // прогресс-бар. Стадии привязаны к настоящим шагам инициализации: между
-    // ними — мелкие шаги анимации (spin_delay), чтобы полоса заполнялась
-    // плавно, а не скачками раз в целую секунду (RTC даёт только такую
-    // грубую точность).
-    serial_print("[BOOT] Starting boot sequence with progress bar...\n");
+    // Вместо линейной полосы прогресса -- вращающийся индикатор из 12
+    // лучиков, как системный activity spinner в macOS.
+    //
+    // ТОЧНАЯ ДЛИТЕЛЬНОСТЬ: раньше весь сплэш был на spin_delay() --
+    // busy-wait на CPU-тактах без привязки к реальному времени, поэтому
+    // "сколько секунд идёт загрузка" плавало в зависимости от скорости
+    // хоста/эмулятора. Теперь общая длительность спиннера — РОВНО 5 секунд
+    // по CMOS RTC (тот же источник времени, что использует sleep_rtc() и
+    // часы на панели), а не по числу nop-итераций. Отсчитываем 5 полных
+    // секундных тиков RTC; внутри каждого тика крутим несколько кадров
+    // спиннера через spin_delay (только чтобы кадры не сливались друг с
+    // другом), но момент завершения задаёт именно RTC-секунда, а не
+    // spin_delay -- поэтому итог не "плывёт" от скорости эмуляции.
+    serial_print("[BOOT] Starting boot sequence with spinner (5s by PIT timer)...\n");
 
-    draw_boot_progress(0, "Checking hardware...");
-    for (int p = 0; p <= 20; p += 2) {
-        draw_boot_progress(p, "Checking hardware...");
-        spin_delay(6000000);
+    static const char* boot_labels[5] = {
+        "Checking hardware...",
+        "Checking hardware...",
+        "Initializing input devices...",
+        "Preparing interface...",
+        "Starting igorOS..."
+    };
+
+    int spin_frame = 0;
+    int mouse_initialized = 0;
+    uint64_t boot_start = timer_millis();
+    uint64_t boot_end = boot_start + 5000ULL;
+
+    while (timer_millis() < boot_end) {
+        uint64_t elapsed = timer_millis() - boot_start;
+        uint32_t second = (uint32_t)(elapsed / 1000ULL);
+        if (second > 4) second = 4;
+
+        if (second >= 2 && !mouse_initialized) {
+            serial_print("[5/6] Initializing mouse...\n");
+            mouse_set_bounds(g_screen_w, g_screen_h);
+            init_mouse();
+            mouse_initialized = 1;
+        }
+
+        draw_boot_spinner(spin_frame, boot_labels[second]);
+        spin_frame = (spin_frame + 1) % 12;
+        timer_wait_ms(40);
     }
 
-    serial_print("[5/6] Initializing mouse...\n");
-    mouse_set_bounds(g_screen_w, g_screen_h);
-    init_mouse();
-    for (int p = 20; p <= 55; p += 3) {
-        draw_boot_progress(p, "Initializing input devices...");
-        spin_delay(6000000);
+    if (!mouse_initialized) {
+        serial_print("[5/6] Initializing mouse...\n");
+        mouse_set_bounds(g_screen_w, g_screen_h);
+        init_mouse();
     }
-
-    for (int p = 55; p <= 85; p += 3) {
-        draw_boot_progress(p, "Preparing interface...");
-        spin_delay(6000000);
-    }
-
-    draw_boot_progress(100, "Starting igorOS...");
-    spin_delay(15000000);
 
     // --- ПЕРЕХОД К ОСНОВНОЙ ЗАГРУЗКЕ ---
     serial_print("[6/6] Starting desktop manager...\n");

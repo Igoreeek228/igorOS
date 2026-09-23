@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdbool.h>
+#include "pic.h"
 
 #define PS2_DATA_PORT    0x60
 #define PS2_STATUS_PORT  0x64
@@ -9,16 +10,6 @@
 int mouse_x = 0;
 int mouse_y = 0;
 int mouse_left_clicked = 0;
-
-static inline uint8_t inb(uint16_t port) {
-    uint8_t ret;
-    __asm__ volatile ("inb %1, %0" : "=a"(ret) : "Nd"(port));
-    return ret;
-}
-
-static inline void outb(uint16_t port, uint8_t val) {
-    __asm__ volatile ("outb %0, %1" : : "a"(val), "Nd"(port));
-}
 
 static inline void io_wait(void) {
     outb(0x80, 0x00);
@@ -37,6 +28,8 @@ typedef struct {
 static mouse_state_t g_mouse = {0};
 static uint8_t mouse_cycle = 0;
 static uint8_t mouse_packet[3];
+
+static void mouse_irq_handler(void); /* определена ниже, нужна в mouse_init() */
 
 /*
  * Максимальный сдвиг за один пакет.
@@ -278,6 +271,20 @@ void mouse_init(void) {
 
     mouse_x = g_mouse.x;
     mouse_y = g_mouse.y;
+
+    /*
+     * Регистрируем настоящий обработчик IRQ12 и снимаем маску.
+     *
+     * IRQ12 (мышь) висит на SLAVE PIC, у которого своя каскадная линия
+     * к MASTER PIC -- это IRQ2. Если не снять маску и с IRQ2 тоже,
+     * прерывания со slave PIC вообще не дойдут до CPU независимо от
+     * состояния маски самого IRQ12 (то же самое явление и в OriginOS,
+     * см. комментарий в их kernel/mouse.c о pic_remap() и masked
+     * legacy PIC в UEFI-прошивках).
+     */
+    irq_install_handler(12, mouse_irq_handler);
+    pic_clear_mask(2);
+    pic_clear_mask(12);
 }
 
 void init_mouse(void) {
@@ -285,30 +292,34 @@ void init_mouse(void) {
 }
 
 /*
- * Вызывай poll_mouse() каждый кадр.
+ * IgorOS Nord: настоящий interrupt-driven PS/2.
  *
- * Главное отличие от старой версии:
- * мы читаем НЕ один байт, а все уже накопившиеся байты.
- * Иначе при быстром движении мыши пакетная очередь PS/2
- * догоняет главный цикл и курсор начинает "летать".
+ * Раньше poll_mouse() сам читал порт 0x60 из главного цикла desktop.c
+ * -- то есть пакеты обрабатывались только тогда, когда доходила
+ * очередь в render-цикле, а не в момент, когда контроллер реально
+ * прислал прерывание. При тяжёлом кадре (много окон/эффектов) это
+ * ощущалось как "дёрганый" курсор: за то время, что уходило на
+ * рендер, могло накопиться несколько пакетов, которые потом
+ * обрабатывались все разом.
+ *
+ * Портировано по духу из OriginOS (kernel/mouse.c): там мышь тоже
+ * висит на IRQ12 и байты читаются прямо в обработчике прерывания, а
+ * не поллингом. Сама логика разбора пакета (mouse_handle_byte) в
+ * IgorOS уже была написана корректно -- переносился только механизм
+ * ДОСТАВКИ байт, а не сама арифметика курсора.
+ */
+static void mouse_irq_handler(void) {
+    uint8_t data = inb(PS2_DATA_PORT);
+    mouse_handle_byte(data);
+}
+
+/*
+ * poll_mouse() оставлена как no-op-совместимость: desktop.c продолжает
+ * вызывать её каждый кадр (в т.ч. дважды за кадр после более раннего
+ * фикса), но теперь реальная работа делается в mouse_irq_handler(),
+ * вызываемом настоящим прерыванием IRQ12. Пустая функция сохранена,
+ * а не удалена, чтобы не трогать desktop.c лишний раз и не плодить
+ * riск регрессии в уже отлаженном коде главного цикла.
  */
 void poll_mouse(void) {
-    /*
-     * За один вызов обработаем максимум несколько десятков байт.
-     * Это не даст мыши полностью заблокировать отрисовку рабочего стола,
-     * если железо начнёт спамить порт.
-     */
-    int packets = 0;
-
-    while ((inb(PS2_STATUS_PORT) & 0x01) && packets < 16) {
-        uint8_t data = inb(PS2_DATA_PORT);
-        mouse_handle_byte(data);
-
-        /*
-         * Один пакет = 3 байта.
-         * Счётчик увеличиваем на завершённый пакет.
-         */
-        if (mouse_cycle == 0)
-            packets++;
-    }
 }

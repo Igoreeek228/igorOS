@@ -10,8 +10,8 @@ body:
       label: ⚠️ Чеклист
       description: Перед созданием предложения, удостоверьтесь что выполнили следующие пункты
       options:
-        - label: Я проверил, что подобной идеи ещё нет в [Issues](https://github.com/JunDevX/CubeHavoc/issues) или [Discussions](https://github.com/JunDevX/CubeHavoc/discussions)
-        - label: Моё предложение относится к улучшению или новому функционалу CubeHavoc
+        - label: Я проверил, что подобной идеи ещё нет в [Issues](https://github.com/Igoreeek228/igorOS/issues)
+        - label: Моё предложение относится к улучшению или новому функционалу IgorOS
           required: true
 
   - type: textarea
@@ -19,7 +19,7 @@ body:
     attributes:
       label: Суть предложения
       description: Кратко опишите, какую функцию или изменение вы хотите увидеть
-      placeholder: Например: Добавить поддержку кастомных шейдеров / оптимизацию для слабых ПК
+      placeholder: Например: Добавить поддержку моей сборки ПК / ноутбука
     validations:
       required: true
 

@@ -1,4 +1,5 @@
 #include "gui/apps/about/about_app.h"
+#include "gui/desktop.h"
 #include "gui/font.h"
 #include "gui/bmp_loader.h"
 
@@ -157,6 +158,7 @@ void render_about_app_window(
     if (
         btn &&
         !dragging &&
+        win_drag_available() &&
         mx >= win_x &&
         mx <= win_x + win_w - traffic_zone_w &&
         my >= win_y &&
@@ -166,6 +168,8 @@ void render_about_app_window(
 
         drag_ox = mx - win_x;
         drag_oy = my - win_y;
+
+        win_drag_claim();
     }
 
 
@@ -178,6 +182,12 @@ void render_about_app_window(
         win_x = mx - drag_ox;
         win_y = my - drag_oy;
     }
+
+    /* BAG: клик по кнопке закрытия реагировал, даже когда курсор
+     * физически над другим, визуально более верхним окном -- клик
+     * "проваливался" сквозь чужой title bar. */
+    win_report_rect(WIN_ID_ABOUT_, win_x, win_y, win_w, win_h, is_open);
+    int occluded = win_click_occluded(WIN_ID_ABOUT_, mx, my);
 
 
     /* ======================================
@@ -348,7 +358,7 @@ void render_about_app_window(
 
     /* Close */
 
-    if (click && hover_close) {
+    if (click && hover_close && !occluded) {
 
         is_open = 0;
         dragging = 0;
@@ -427,7 +437,7 @@ void render_about_app_window(
 
 
     draw_string(
-        "igorOS Nord",
+        "igorOS Revolution",
         text_x,
         text_y,
         0x001C1C1E,
@@ -440,7 +450,7 @@ void render_about_app_window(
 
 
     draw_string(
-        "Version 0.4",
+        "Version 0.5",
         text_x,
         text_y,
         0x001C1C1E,
