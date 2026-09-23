@@ -11,6 +11,7 @@
 #include "gui/apps/terminal/terminal_app.h"
 #include "drivers/system/keyboard.h"
 #include "drivers/system/mouse.h"
+#include "drivers/system/sound_manager.h"
 
 extern void toggle_file_manager(void) __attribute__((weak));
 
@@ -1118,6 +1119,9 @@ void render_volume_popup(void)
 
             current_volume =
                 new_vol;
+
+            /* Сразу применяем к реальному аудиоустройству. */
+            sound_set_volume((uint8_t)current_volume);
         }
     }
 }
@@ -1871,6 +1875,13 @@ void desktop_init(
 
     init_keyboard();
     init_mouse();
+
+    /*
+     * Sound: выбираем устройство и применяем начальную громкость.
+     */
+
+    sound_init();
+    sound_set_volume((uint8_t)current_volume);
 
     /*
      * RTC

@@ -38,7 +38,10 @@ static uint16_t nambar  = 0;
 static uint16_t nabmbar = 0;
 
 static ac97_bdl_entry_t bdl[32] __attribute__((aligned(16)));
-static uint8_t dma_buffer[65536] __attribute__((aligned(16)));
+
+/* Виртуальный адрес ядра -> физический (для DMA). Реализовано в kernel.c
+ * через смещение Limine HHDM. */
+extern uint64_t kernel_virt_to_phys(uint64_t virt);
 
 static uint32_t pci_read_config(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset) {
     uint32_t address = (uint32_t)((bus << 16) | (slot << 11) |
@@ -88,21 +91,40 @@ void ac97_set_volume(uint8_t volume) {
 }
 
 void ac97_play_pcm(const uint8_t *pcm_data, uint32_t length) {
-    if (!nabmbar || length == 0) return;
-    if (length > sizeof(dma_buffer)) length = sizeof(dma_buffer);
+    if (!nabmbar || !pcm_data || length == 0) return;
 
-    for (uint32_t i = 0; i < length; i++) {
-        dma_buffer[i] = pcm_data[i];
+    /* Останавливаем текущее воспроизведение, пока перепрограммируем BDL. */
+    outb(nabmbar + 0x1B, 0x00);
+
+    /*
+     * Zero-copy: дескрипторы указывают прямо на переданный буфер
+     * (в т.ч. на вшитые в ядро WAV-дорожки). Один дескриптор описывает
+     * не более 65535 сэмплов (поле samples 16-битное), поэтому длинный
+     * буфер разбивается на цепочку до 32 дескрипторов.
+     */
+    uint32_t off = 0;
+    int n = 0;
+
+    while (off < length && n < 32) {
+        uint32_t chunk = length - off;
+        if (chunk > 65535u * 2) chunk = 65535u * 2;
+        chunk &= ~3u; /* чётное число 16-битных сэмплов */
+        if (chunk == 0) break;
+
+        bdl[n].phys_addr = (uint32_t)kernel_virt_to_phys((uint64_t)(uintptr_t)(pcm_data + off));
+        bdl[n].samples   = (uint16_t)(chunk / 2);
+        bdl[n].flags     = 0; /* без прерываний: статус не опрашиваем */
+        off += chunk;
+        n++;
     }
 
-    bdl[0].phys_addr = (uint32_t)(unsigned long)&dma_buffer[0];
-    bdl[0].samples   = (uint16_t)(length / 2);
-    bdl[0].flags     = 0x8000;
+    if (n == 0) return;
 
-    outb(nabmbar + 0x1B, 0x00);
-    outb(nabmbar + 0x1B, 0x02);
+    bdl[n - 1].flags = 0x8000; /* IOC на последнем дескрипторе */
 
-    outl(nabmbar + 0x10, (uint32_t)(unsigned long)&bdl[0]);
-    outb(nabmbar + 0x15, 0);
-    outb(nabmbar + 0x1B, 0x01);
+    outb(nabmbar + 0x1B, 0x02);               /* сброс DMA-движка */
+    outl(nabmbar + 0x10, (uint32_t)kernel_virt_to_phys((uint64_t)(uintptr_t)bdl));
+    outb(nabmbar + 0x15, (uint8_t)(n - 1));   /* LVI: индекс последнего */
+    outw(nabmbar + 0x16, 0xFFFF);             /* очистка флагов статуса */
+    outb(nabmbar + 0x1B, 0x01);               /* запуск */
 }

@@ -18,6 +18,20 @@ static volatile struct limine_framebuffer_request framebuffer_request = {
     .revision = 0
 };
 
+__attribute__((used, section(".requests")))
+static volatile struct limine_hhdm_request hhdm_request = {
+    .id = LIMINE_HHDM_REQUEST,
+    .revision = 0
+};
+
+/* Смещение прямого (HHDM) отображения физической памяти. Нужно драйверам
+ * с DMA, чтобы переводить виртуальные адреса ядра в физические. */
+static uint64_t g_hhdm_offset = 0;
+
+uint64_t kernel_virt_to_phys(uint64_t virt) {
+    return virt - g_hhdm_offset;
+}
+
 uint8_t* g_fb_vram = 0;
 uint32_t g_screen_w = 0;
 uint32_t g_screen_h = 0;
@@ -277,6 +291,10 @@ void kernel_main(void) {
     g_screen_h = (uint32_t)fb->height;
     g_screen_pitch = (uint32_t)fb->pitch;
     g_screen_bpp = (uint32_t)fb->bpp;
+
+    if (hhdm_request.response != NULL) {
+        g_hhdm_offset = hhdm_request.response->offset;
+    }
 
     serial_print("[2/6] Framebuffer initialized successfully.\n");
     

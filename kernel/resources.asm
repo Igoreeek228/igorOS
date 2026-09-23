@@ -97,6 +97,33 @@ terminal_icon_bmp_end:
 
 
 ; ==========================================
+; Аудио-дорожки (WAV 22.05 kHz, stereo, 16-bit)
+; align 16: DMA-дескрипторы AC'97 требуют выравнивания буфера
+; ==========================================
+
+align 16
+global track1_wav_start
+global track1_wav_end
+track1_wav_start:
+    incbin "src/gui/apps/music/track1.wav"
+track1_wav_end:
+
+align 16
+global track2_wav_start
+global track2_wav_end
+track2_wav_start:
+    incbin "src/gui/apps/music/track2.wav"
+track2_wav_end:
+
+align 16
+global track3_wav_start
+global track3_wav_end
+track3_wav_start:
+    incbin "src/gui/apps/music/track3.wav"
+track3_wav_end:
+
+
+; ==========================================
 ; Метаданные: запрет исполняемого стека
 ; ==========================================
 
