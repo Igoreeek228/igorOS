@@ -8,6 +8,7 @@
 #include "gui/apps/file/file_manager.h"
 #include "gui/apps/music/music_app.h"
 #include "gui/apps/about/about_app.h"
+#include "gui/apps/terminal/terminal_app.h"
 #include "drivers/system/keyboard.h"
 #include "drivers/system/mouse.h"
 
@@ -15,6 +16,7 @@ extern void toggle_file_manager(void) __attribute__((weak));
 
 extern const uint8_t file_icon_bmp_start[] __attribute__((weak));
 extern const uint8_t music_icon_bmp_start[] __attribute__((weak));
+extern const uint8_t terminal_icon_bmp_start[] __attribute__((weak));
 extern const uint8_t start_icon_bmp_start[] __attribute__((weak));
 extern const uint8_t volume_bmp_start[] __attribute__((weak));
 extern const uint8_t wallpaper_bmp_start[] __attribute__((weak));
@@ -75,11 +77,11 @@ typedef struct {
 } dock_app_t;
 
 static dock_app_t dock_apps[] = {
-    {"File",     file_icon_bmp_start,  0x00007AFF},
-    {"Terminal", 0,                    0x001C1C1E},
-    {"Editor",   0,                    0x00FF9500},
-    {"Settings", 0,                    0x008E8E93},
-    {"Music",    music_icon_bmp_start, 0x00FF2D55}
+    {"File",     file_icon_bmp_start,     0x00007AFF},
+    {"Terminal", terminal_icon_bmp_start, 0x001C1C1E},
+    {"Editor",   0,                       0x00FF9500},
+    {"Settings", 0,                       0x008E8E93},
+    {"Music",    music_icon_bmp_start,    0x00FF2D55}
 };
 
 static int app_count =
@@ -1709,6 +1711,15 @@ void render_layer_dock(int single_click)
                 }
 
                 /*
+                 * Terminal
+                 */
+
+                else if (i == 1)
+                {
+                    toggle_terminal();
+                }
+
+                /*
                  * Music
                  */
 
@@ -1938,12 +1949,16 @@ void desktop_run(void)
 
         /*
          * Keyboard
+         *
+         * Символы направляются активному приложению.
+         * Пока единственное приложение с текстовым вводом — терминал.
          */
 
         char key =
             keyboard_getchar();
 
-        (void)key;
+        if (key && terminal_is_open())
+            terminal_feed_key(key);
 
         /*
          * Background
@@ -1983,6 +1998,16 @@ void desktop_run(void)
             backbuffer,
             scr_width,
             scr_height,
+            mouse_x,
+            mouse_y,
+            mouse_left_clicked,
+            single_click
+        );
+
+        render_terminal_window(
+            backbuffer,
+            (int)scr_width,
+            (int)scr_height,
             mouse_x,
             mouse_y,
             mouse_left_clicked,

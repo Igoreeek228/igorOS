@@ -73,6 +73,30 @@ volume_bmp_end:
 
 
 ; ==========================================
+; Start menu icon (кнопка меню в топбаре)
+; ==========================================
+
+global start_icon_bmp_start
+global start_icon_bmp_end
+
+start_icon_bmp_start:
+    incbin "src/gui/start.bmp"
+start_icon_bmp_end:
+
+
+; ==========================================
+; Terminal icon
+; ==========================================
+
+global terminal_icon_bmp_start
+global terminal_icon_bmp_end
+
+terminal_icon_bmp_start:
+    incbin "src/gui/apps/terminal/terminal_icon.bmp"
+terminal_icon_bmp_end:
+
+
+; ==========================================
 ; Метаданные: запрет исполняемого стека
 ; ==========================================
 
