@@ -29,6 +29,7 @@
   <h3>📷 Скриншоты / Интерфейс</h3>
   <img src="https://github.com/JunDevX/igorOS_Update/blob/Main/gh_page/photo1.png" alt="IgorOS Screenshot" width="80%" />
 </div>
+
 ## 🌟 Ключевые возможности
 
 <table>
