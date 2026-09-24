@@ -4,7 +4,7 @@
 
 </div>
 
-![Alt text](https://github.com/JunDevX/igorOS_Update/blob/Main/updatestg.jpg)
+![Alt text](https://github.com/Igoreeek228/igorOS/blob/Main/updatestg.jpg)
 
 <div align="center">
 
